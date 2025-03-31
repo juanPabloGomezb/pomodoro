@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonicModule, AlertController } from '@ionic/angular';
 import { PomodoroService, PomodoroSession } from '../services/pomodoro.service';
+import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-historial',
@@ -10,7 +11,8 @@ import { PomodoroService, PomodoroSession } from '../services/pomodoro.service';
   standalone: true,
   imports: [
     CommonModule,
-    IonicModule
+    IonicModule,
+    RouterLink
   ]
 })
 export class HistorialPage implements OnInit {

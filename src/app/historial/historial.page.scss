@@ -1,39 +1,63 @@
-.container {
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
+// Variables
+$primary-color: #3880ff;
+$danger-color: #eb445a;
+$tertiary-color: #7044ff;
+$dark-bg: #121212;
+$card-bg: #1e1e1e;
+$text-color: #ffffff;
+$text-secondary: #b0b0b0;
+$timer-circle-size: 250px;
+$timer-circle-border: 8px;
+.tab-navigation {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: space-around;
+  background-color: $card-bg;
+  padding: 12px 0 8px;
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.2);
+}
+
+.tab-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: $text-secondary;
+  cursor: pointer;
+  
+  &.active {
+    color: $primary-color;
   }
   
-  .timer-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    margin: 30px 0;
+  ion-icon {
+    font-size: 24px;
+    margin-bottom: 4px;
   }
   
-  .timer {
-    font-size: 60px;
-    font-weight: bold;
-    margin: 0;
-    color: var(--ion-color-primary);
+  .tab-label {
+    font-size: 12px;
+  }
+}
+
+// Responsive adjustments
+@media (max-width: 768px) {
+  .container {
+    padding: 12px;
   }
   
-  .phase-label {
+  .timer-card, .settings-section {
+    padding: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .phase-title {
     font-size: 20px;
-    margin: 10px 0 0;
-    color: var(--ion-color-medium);
   }
   
-  .button-container {
-    display: flex;
-    justify-content: center;
-    flex-wrap: wrap;
-    gap: 10px;
-    margin: 20px 0;
+  ion-button {
+    font-size: 14px;
   }
-  
-  ion-item {
-    --padding-start: 0;
-  }
+}
