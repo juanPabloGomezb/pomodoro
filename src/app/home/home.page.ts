@@ -82,10 +82,14 @@ export class HomePage implements OnInit, OnDestroy {
         localStorage.setItem('pomodoro_background_time', Date.now().toString());
       }
     });
-
+  
     this.platform.resume.subscribe(() => {
       // La app ha vuelto a primer plano
       console.log('App en primer plano');
+      
+      // Verificar notificaciones pendientes (AÑADIR ESTA LÍNEA)
+      this.notificationsService.checkPendingNotifications();
+      
       // Ajustar el tiempo si el temporizador estaba corriendo
       if (this.timerRunning) {
         const backgroundTime = localStorage.getItem('pomodoro_background_time');

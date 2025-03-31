@@ -1,53 +1,103 @@
 import { Injectable } from '@angular/core';
-import { Platform } from '@ionic/angular';
+import { Platform, ToastController, AlertController } from '@ionic/angular';
 
 @Injectable({
   providedIn: 'root'
 })
 export class NotificationsService {
-  private hasPermission = false;
+  
+  constructor(
+    private platform: Platform,
+    private toastController: ToastController,
+    private alertController: AlertController
+  ) {}
 
-  constructor(private platform: Platform) {}
-
-  // Solicitar permiso para mostrar notificaciones
+  // No need for permission requests with this approach
   async requestPermission(): Promise<void> {
-    // Solo solicitar permiso en navegadores web
-    if (typeof Notification !== 'undefined') {
-      if (Notification.permission === 'granted') {
-        this.hasPermission = true;
-      } else if (Notification.permission !== 'denied') {
-        const permission = await Notification.requestPermission();
-        this.hasPermission = permission === 'granted';
+    // Just a placeholder for compatibility
+    console.log('Notifications service initialized');
+    return Promise.resolve();
+  }
+
+  // Show notification using Toast or Alert
+  async showNotification(title: string, body: string): Promise<void> {
+    console.log('Mostrando notificación:', title, body);
+    
+    // If app is in foreground
+    if (!document.hidden) {
+      await this.showToast(title, body);
+    } else {
+      // For background, we'll try to use a more prominent alert when they return
+      localStorage.setItem('pending_notification', JSON.stringify({
+        title,
+        body,
+        timestamp: Date.now()
+      }));
+    }
+  }
+
+  // Show a toast notification
+  private async showToast(title: string, body: string): Promise<void> {
+    const toast = await this.toastController.create({
+      header: title,
+      message: body,
+      position: 'top',
+      duration: 3000,
+      buttons: [
+        {
+          text: 'OK',
+          role: 'cancel'
+        }
+      ],
+      color: 'primary'
+    });
+    
+    await toast.present();
+
+    // Also play sound
+    this.playSound();
+  }
+
+  // Checks for pending notifications on app resume
+  checkPendingNotifications(): void {
+    const pendingNotificationJson = localStorage.getItem('pending_notification');
+    if (pendingNotificationJson) {
+      try {
+        const notification = JSON.parse(pendingNotificationJson);
+        // Only show if it's relatively recent (last 5 minutes)
+        if (Date.now() - notification.timestamp < 5 * 60 * 1000) {
+          this.showAlert(notification.title, notification.body);
+        }
+        localStorage.removeItem('pending_notification');
+      } catch (e) {
+        console.error('Error parsing pending notification', e);
+        localStorage.removeItem('pending_notification');
       }
     }
   }
 
-  // Mostrar una notificación
-  showNotification(title: string, body: string): void {
-    // Si la app está en primer plano, mostrar una alerta
-    if (!document.hidden) {
-      // Aquí podrías usar un componente de alerta de Ionic
-      // o simplemente usar un sonido como en la implementación actual
-      console.log('Alerta en primer plano:', title, body);
-      
-      // También podrías usar ToastController o AlertController de Ionic
-    } 
-    // Si la app está en segundo plano o el navegador lo soporta, mostrar una notificación
-    else if (this.hasPermission && typeof Notification !== 'undefined') {
-      const notification = new Notification(title, {
-        body,
-        icon: 'assets/icon/favicon.png'
+  // Show a more prominent alert dialog
+  private async showAlert(title: string, body: string): Promise<void> {
+    const alert = await this.alertController.create({
+      header: title,
+      message: body,
+      buttons: ['OK'],
+      cssClass: 'notification-alert'
+    });
+
+    await alert.present();
+    this.playSound();
+  }
+
+  // Play a sound for notification
+  private playSound(): void {
+    try {
+      const audio = new Audio('assets/sounds/alert.mp3');
+      audio.play().catch(error => {
+        console.error('Error al reproducir el sonido:', error);
       });
-      
-      // Cerrar la notificación después de 5 segundos
-      setTimeout(() => notification.close(), 5000);
-    }
-    
-    // Para aplicaciones móviles, deberías usar un plugin como Local Notifications
-    // Cordova o Capacitor para enviar notificaciones nativas
-    if (this.platform.is('cordova') || this.platform.is('capacitor')) {
-      // Aquí iría la implementación con el plugin nativo
-      console.log('Debería enviar notificación nativa:', title, body);
+    } catch (error) {
+      console.error('Error al crear el objeto de audio:', error);
     }
   }
 }
