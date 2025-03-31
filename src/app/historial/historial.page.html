@@ -1,0 +1,54 @@
+<ion-header [translucent]="true">
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/home"></ion-back-button>
+    </ion-buttons>
+    <ion-title>
+      Historial de Pomodoros
+    </ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="clearHistory()">
+        <ion-icon name="trash-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <div class="container">
+    <ion-list>
+      <ng-container *ngFor="let dayGroup of sessionsByDay">
+        <ion-list-header>
+          {{ formatDate(dayGroup.date) }}
+        </ion-list-header>
+
+        <ion-item *ngFor="let session of dayGroup.sessions">
+          <ion-label>
+            <h2>{{ session.taskName }}</h2>
+            <p>
+              <ion-text color="medium">
+                {{ formatTime(session.startTime) }} - {{ formatTime(session.endTime) }}
+              </ion-text>
+            </p>
+            <p>Duración: {{ formatDuration(session.duration) }}</p>
+          </ion-label>
+        </ion-item>
+        
+        <ion-item lines="none" *ngIf="dayGroup.sessions.length > 0">
+          <ion-label>
+            <p>
+              <ion-text color="medium">
+                Total: {{ getTotalTime(dayGroup.sessions) }}
+              </ion-text>
+            </p>
+          </ion-label>
+        </ion-item>
+      </ng-container>
+    </ion-list>
+
+    <div class="empty-state" *ngIf="sessionsByDay.length === 0">
+      <ion-icon name="time-outline" size="large"></ion-icon>
+      <p>No hay sesiones registradas</p>
+    </div>
+  </div>
+</ion-content>

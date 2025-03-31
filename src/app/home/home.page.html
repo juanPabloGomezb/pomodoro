@@ -1,20 +1,139 @@
 <ion-header [translucent]="true">
-  <ion-toolbar>
+  <ion-toolbar color="dark">
     <ion-title>
-      Blank
+      Timer Pomodoro
     </ion-title>
+    <ion-buttons slot="end">
+      <ion-button routerLink="/historial">
+        <ion-icon name="calendar-outline"></ion-icon>
+        <ion-label>Historial</ion-label>
+      </ion-button>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">Blank</ion-title>
-    </ion-toolbar>
-  </ion-header>
-
-  <div id="container">
-    <strong>Ready to create an app?</strong>
-    <p>Start with Ionic <a target="_blank" rel="noopener noreferrer" href="https://ionicframework.com/docs/components">UI Components</a></p>
+<ion-content [fullscreen]="true" class="ion-padding dark-bg">
+  <div class="container">
+    <!-- Card for the timer -->
+    <div class="timer-card">
+      <h2 class="phase-title">{{ currentPhaseLabel }}</h2>
+      
+      <!-- Task input field - prominently displayed -->
+      <div class="task-input-container">
+        <label class="task-label">Tarea actual</label>
+        <input 
+          type="text" 
+          class="custom-input" 
+          [disabled]="timerRunning || timerPaused" 
+          [(ngModel)]="taskName" 
+          placeholder="Escribe el nombre de la tarea"
+        >
+      </div>
+      
+      <!-- Timer Circle -->
+      <div class="timer-container">
+        <div class="timer-circle">
+          <h1 class="timer">{{ displayTime }}</h1>
+          <div class="reset-icon" (click)="resetTimer()" *ngIf="!timerRunning">
+            <ion-icon name="refresh-outline"></ion-icon>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Control buttons -->
+      <div class="control-buttons">
+        <ion-button class="add-time-btn" expand="block" *ngIf="timerRunning || timerPaused" (click)="addOneMinute()">
+          <ion-icon name="add-outline" slot="start"></ion-icon>
+          Añadir 1:00
+        </ion-button>
+        
+        <!-- Start/Pause/Resume buttons -->
+        <ng-container *ngIf="!timerRunning && !timerPaused">
+          <ion-button class="start-btn" expand="block" [disabled]="!taskName || taskName.trim() === ''" (click)="startTimer()">
+            <ion-icon name="play-outline" slot="start"></ion-icon>
+            Iniciar tiempo
+          </ion-button>
+        </ng-container>
+        
+        <ng-container *ngIf="timerRunning">
+          <ion-button class="pause-btn" expand="block" (click)="pauseTimer()">
+            <ion-icon name="pause-outline" slot="start"></ion-icon>
+            Pausar
+          </ion-button>
+        </ng-container>
+        
+        <ng-container *ngIf="timerPaused">
+          <ion-button class="resume-btn" expand="block" (click)="resumeTimer()">
+            <ion-icon name="play-outline" slot="start"></ion-icon>
+            Continuar
+          </ion-button>
+        </ng-container>
+      </div>
+      
+      <!-- Additional action buttons -->
+      <div *ngIf="timerRunning || timerPaused" class="action-buttons">
+        <ion-button color="danger" (click)="stopTimer()">
+          <ion-icon name="stop-outline" slot="start"></ion-icon>
+          Detener sesión
+        </ion-button>
+        
+        <ion-button color="tertiary" (click)="skipToNextPhase()">
+          <ion-icon name="play-forward-outline" slot="start"></ion-icon>
+          Saltar fase
+        </ion-button>
+      </div>
+      
+      <!-- History button for easy access -->
+      <div class="history-button-container" *ngIf="!timerRunning && !timerPaused">
+        <ion-button color="medium" expand="block" routerLink="/historial">
+          <ion-icon name="time-outline" slot="start"></ion-icon>
+          Ver historial de sesiones
+        </ion-button>
+      </div>
+    </div>
+    
+    <!-- Settings section -->
+    <div class="settings-section">
+      <ion-item>
+        <ion-icon name="time-outline" slot="start"></ion-icon>
+        <ion-label>Duración del descanso largo</ion-label>
+        <ion-select [(ngModel)]="longBreakDuration" (ionChange)="saveLongBreakPreference()">
+          <ion-select-option [value]="15">15 minutos</ion-select-option>
+          <ion-select-option [value]="30">30 minutos</ion-select-option>
+        </ion-select>
+      </ion-item>
+      
+      <ion-item lines="none">
+        <ion-icon name="hourglass-outline" slot="start"></ion-icon>
+        <ion-label>
+          <h2>Ciclo actual: {{ currentCycle }}/4</h2>
+          <p>Sesiones completadas hoy: {{ completedSessions }}</p>
+        </ion-label>
+      </ion-item>
+    </div>
+  </div>
+  
+  <!-- Bottom tab navigation -->
+  <div class="tab-navigation">
+    <div class="tab-item">
+      <ion-icon name="alarm-outline"></ion-icon>
+      <div class="tab-label">Alarma</div>
+    </div>
+    <div class="tab-item">
+      <ion-icon name="time-outline"></ion-icon>
+      <div class="tab-label">Reloj</div>
+    </div>
+    <div class="tab-item active">
+      <ion-icon name="hourglass-outline"></ion-icon>
+      <div class="tab-label">Timer</div>
+    </div>
+    <div class="tab-item">
+      <ion-icon name="stopwatch-outline"></ion-icon>
+      <div class="tab-label">Cronómetro</div>
+    </div>
+    <div class="tab-item" routerLink="/historial">
+      <ion-icon name="calendar-outline"></ion-icon>
+      <div class="tab-label">Historial</div>
+    </div>
   </div>
 </ion-content>
