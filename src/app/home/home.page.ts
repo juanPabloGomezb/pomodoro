@@ -51,6 +51,20 @@ export class HomePage implements OnInit, OnDestroy {
     // Solicitar permisos para notificaciones
     this.notificationsService.requestPermission();
     
+    // Configurar los listeners para las acciones de notificación
+    this.notificationsService.setupNotificationListeners({
+      onPause: () => {
+        this.ngZone.run(() => {
+          this.pauseTimer();
+        });
+      },
+      onSkip: () => {
+        this.ngZone.run(() => {
+          this.skipToNextPhase();
+        });
+      }
+    });
+    
     // Cargar la preferencia del descanso largo
     this.loadLongBreakPreference();
     
@@ -75,11 +89,28 @@ export class HomePage implements OnInit, OnDestroy {
   handleBackgroundMode() {
     // Manejar eventos para cuando la app está en segundo plano
     this.platform.pause.subscribe(() => {
-      // La app ha pasado a segundo plano, pero el temporizador continúa
+      // La app ha pasado a segundo plano
       console.log('App en segundo plano');
       // Guardar el tiempo actual cuando la app entra en segundo plano
       if (this.timerRunning) {
         localStorage.setItem('pomodoro_background_time', Date.now().toString());
+        
+        // Enviar notificación con el estado actual
+        let message = '';
+        if (this.currentPhase === 'work') {
+          message = `Trabajando en: ${this.taskName}`;
+        } else if (this.currentPhase === 'shortBreak') {
+          message = 'Descanso corto en progreso';
+        } else {
+          message = 'Descanso largo en progreso';
+        }
+        
+        this.notificationsService.showNotification(
+          'Pomodoro Timer',
+          message,
+          this.displayTime,
+          this.timerId
+        );
       }
     });
   
@@ -87,7 +118,7 @@ export class HomePage implements OnInit, OnDestroy {
       // La app ha vuelto a primer plano
       console.log('App en primer plano');
       
-      // Verificar notificaciones pendientes (AÑADIR ESTA LÍNEA)
+      // Verificar notificaciones pendientes
       this.notificationsService.checkPendingNotifications();
       
       // Ajustar el tiempo si el temporizador estaba corriendo
@@ -287,8 +318,13 @@ export class HomePage implements OnInit, OnDestroy {
       message = `¡Toma un descanso largo de ${this.longBreakDuration} minutos!`;
     }
     
-    // Mostrar notificación
-    this.notificationsService.showNotification('Pomodoro Timer', message);
+    // Mostrar notificación con tiempo restante
+    this.notificationsService.showNotification(
+      'Pomodoro Timer', 
+      message,
+      this.displayTime,  // Tiempo restante
+      this.timerId       // ID del temporizador para controles
+    );
     
     // Además reproducir un sonido
     this.playAlertSound();

@@ -34,6 +34,8 @@
                 android:resource="@xml/file_paths"></meta-data>
         </provider>
     </application>
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <!-- Permissions -->
 
